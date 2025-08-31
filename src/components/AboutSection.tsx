@@ -1,23 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { Terminal, User, MapPin, Mail, Calendar, Code, Server } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Terminal, Code, Server } from 'lucide-react';
+import { SkillsShowcase } from './SkillsShowcase';
 
 interface AboutProps {
   darkMode: boolean;
 }
 
 const About: React.FC<AboutProps> = ({ darkMode }) => {
-  const [currentCommand, setCurrentCommand] = useState('');
-  const [showOutput, setShowOutput] = useState(false);
+  const [input, setInput] = useState('');
+  const [history, setHistory] = useState<string[]>([]);
   const [outputLines, setOutputLines] = useState<string[]>([]);
+  const terminalRef = useRef<HTMLDivElement>(null);
 
-  const commands = [
-    'whoami',
-    'cat /etc/profile',
-    'ls -la ~/skills',
-    'history | tail -5'
-  ];
-
-  const commandOutputs = {
+  const commands: Record<string, string[]> = {
     'whoami': [
       'oussema',
       '',
@@ -61,58 +56,23 @@ const About: React.FC<AboutProps> = ({ darkMode }) => {
     ]
   };
 
+  const handleCommand = (cmd: string) => {
+    setHistory(prev => [...prev, `$ ${cmd}`]);
+    if (commands[cmd]) {
+      setOutputLines(prev => [...prev, ...commands[cmd]]);
+    } else {
+      setOutputLines(prev => [...prev, `Command not found: ${cmd}`]);
+    }
+    setInput('');
+  };
+
   useEffect(() => {
-    const interval = setInterval(() => {
-      const randomCommand = commands[Math.floor(Math.random() * commands.length)];
-      setCurrentCommand('');
-      setShowOutput(false);
-      setOutputLines([]);
-
-      // Type the command
-      let i = 0;
-      const typeCommand = () => {
-        if (i < randomCommand.length) {
-          setCurrentCommand(randomCommand.slice(0, i + 1));
-          i++;
-          setTimeout(typeCommand, 100);
-        } else {
-          // Show output after command is typed
-          setTimeout(() => {
-            setShowOutput(true);
-            const output = commandOutputs[randomCommand as keyof typeof commandOutputs];
-            let lineIndex = 0;
-            const showLines = () => {
-              if (lineIndex < output.length) {
-                setOutputLines(prev => [...prev, output[lineIndex]]);
-                lineIndex++;
-                setTimeout(showLines, 200);
-              }
-            };
-            showLines();
-          }, 500);
-        }
-      };
-      typeCommand();
-    }, 8000);
-
-    // Initial command
-    setCurrentCommand('whoami');
-    setTimeout(() => {
-      setShowOutput(true);
-      const output = commandOutputs['whoami'];
-      let lineIndex = 0;
-      const showLines = () => {
-        if (lineIndex < output.length) {
-          setOutputLines(prev => [...prev, output[lineIndex]]);
-          lineIndex++;
-          setTimeout(showLines, 200);
-        }
-      };
-      showLines();
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
+    // Scroll to bottom whenever output changes
+    terminalRef.current?.scrollTo({
+      top: terminalRef.current.scrollHeight,
+      behavior: 'smooth'
+    });
+  }, [history, outputLines]);
 
   return (
     <section id="about" className="py-20 bg-black">
@@ -139,54 +99,76 @@ const About: React.FC<AboutProps> = ({ darkMode }) => {
             </div>
 
             {/* Terminal Content */}
-            <div className="p-6 font-mono text-sm">
-              <div className="space-y-2">
-                {/* Welcome message */}
-                <div className="text-green-400">
-                  Welcome to Ubuntu 22.04.3 LTS (GNU/Linux 5.15.0-91-generic x86_64)
-                </div>
-                <div className="text-gray-400">
-                  * Documentation:  https://help.ubuntu.com
-                </div>
-                <div className="text-gray-400">
-                  * Management:     https://landscape.canonical.com
-                </div>
-                <div className="text-gray-400">
-                  * Support:        https://ubuntu.com/advantage
-                </div>
-                <div className="text-gray-400 mb-4">
-                  Last login: {new Date().toLocaleDateString()} from 192.168.1.100
-                </div>
-
-                {/* Command prompt */}
-                <div className="flex items-center space-x-2">
-                  <span className="text-green-400">oussema@ubuntu</span>
-                  <span className="text-white">:</span>
-                  <span className="text-blue-400">~</span>
-                  <span className="text-white">$</span>
-                  <span className="text-white">
-                    {currentCommand}
-                    <span className="animate-pulse">|</span>
-                  </span>
-                </div>
-
-                {/* Command output */}
-                {showOutput && (
-                  <div className="mt-2 space-y-1">
-                    {outputLines.map((line, index) => (
-                      <div key={index} className={`${
-                        line && line.startsWith('#') ? 'text-gray-400' : 
-                        line && line.startsWith('export') ? 'text-yellow-400' :
-                        line && (line.startsWith('drwx') || line.startsWith('-rw-')) ? 'text-blue-400' :
-                        line && line.includes('oussema') ? 'text-green-400' :
-                        'text-gray-300'
-                      }`}>
-                        {line || ''}
-                      </div>
-                    ))}
-                  </div>
-                )}
+            <div
+              ref={terminalRef}
+              className="p-6 font-mono text-sm h-96 overflow-y-auto space-y-1"
+            >
+              {/* Welcome message */}
+              <div className="text-green-400">
+                Welcome to Ubuntu 22.04.3 LTS (GNU/Linux 5.15.0-91-generic x86_64)
               </div>
+              <div className="text-gray-400">
+                * Documentation:  https://help.ubuntu.com
+              </div>
+              <div className="text-gray-400">
+                * Management:     https://landscape.canonical.com
+              </div>
+              <div className="text-gray-400">
+                * Support:        https://ubuntu.com/advantage
+              </div>
+              <div className="text-gray-400 mb-4">
+                Last login: {new Date().toLocaleDateString()} from 192.168.1.100
+              </div>
+
+              {/* Display previous commands */}
+              {history.map((line, idx) => (
+                <div key={idx} className="text-white">{line}</div>
+              ))}
+
+              {/* Display command output */}
+              {outputLines.map((line, idx) => {
+                const color = line.startsWith('#')
+                  ? 'text-gray-400'
+                  : line.startsWith('export')
+                    ? 'text-yellow-400'
+                    : line.startsWith('-rw-') || line.startsWith('drwx')
+                      ? 'text-blue-400'
+                      : 'text-green-400';
+                return <div key={idx} className={color}>{line}</div>;
+              })}
+
+              {/* Input prompt */}
+              <div className="flex items-center space-x-2">
+                <span className="text-green-400">oussema@ubuntu</span>
+                <span className="text-white">:</span>
+                <span className="text-blue-400">~</span>
+                <span className="text-white">$</span>
+                <input
+                  type="text"
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' && input.trim()) {
+                      handleCommand(input.trim());
+                    }
+                  }}
+                  className="bg-transparent focus:outline-none text-white flex-1 font-mono"
+                  autoFocus
+                />
+              </div>
+            </div>
+
+            {/* Command Buttons */}
+            <div className="bg-gray-800 p-4 flex flex-wrap gap-2 border-t border-gray-700">
+              {Object.keys(commands).map(cmd => (
+                <button
+                  key={cmd}
+                  onClick={() => handleCommand(cmd)}
+                  className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded font-mono text-sm transition"
+                >
+                  {cmd}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -224,8 +206,12 @@ const About: React.FC<AboutProps> = ({ darkMode }) => {
           </div>
         </div>
       </div>
+      <SkillsShowcase />
+
     </section>
   );
 };
+
+
 
 export default About;
