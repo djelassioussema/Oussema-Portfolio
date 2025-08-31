@@ -2,11 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Terminal, Code, Server } from 'lucide-react';
 import { SkillsShowcase } from './SkillsShowcase';
 
-interface AboutProps {
-  darkMode: boolean;
-}
-
-const About: React.FC<AboutProps> = ({ darkMode }) => {
+const About: React.FC = () => {
   const [input, setInput] = useState('');
   const [history, setHistory] = useState<string[]>([]);
   const [outputLines, setOutputLines] = useState<string[]>([]);

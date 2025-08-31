@@ -6,6 +6,8 @@ const HeroSection = () => {
     "Hi, I'm Oussema",
     'Hola, soy Oussema',
     'Hallo, ich bin Oussema',
+    'Hei, jeg er Oussema',
+    'Hej, jag är Oussema',
     'مرحبًا، أنا أسامة',
     'こんにちは、オスマです'
   ];
@@ -29,7 +31,7 @@ const HeroSection = () => {
         setDisplayText(currentText.slice(0, charIndex - 1));
         setCharIndex(prev => prev - 1);
       } else if (!isDeleting && charIndex === currentText.length) {
-        setTimeout(() => setIsDeleting(true), 1000);
+        setTimeout(() => setIsDeleting(true), 2500);
       } else if (isDeleting && charIndex === 0) {
         setIsDeleting(false);
         setTextIndex(prev => (prev + 1) % texts.length);

@@ -26,7 +26,6 @@ interface Skill {
   icon: React.ElementType;
   color: string;
   bgColor: string;
-  proficiency: number;
   tools: string[];
   achievements: string[];
 }
@@ -38,7 +37,6 @@ interface SkillCategory {
 
 export function SkillsShowcase() {
   const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
-  const [animatedProficiencies, setAnimatedProficiencies] = useState<Record<string, number>>({});
 
   const skills: Skill[] = [
     {
@@ -49,7 +47,6 @@ export function SkillsShowcase() {
       icon: Shield,
       color: 'text-red-400',
       bgColor: 'bg-red-500/10',
-      proficiency: 95,
       tools: ['Chaos Monkey', 'Gremlin', 'PagerDuty', 'Datadog', 'New Relic', 'SLI/SLO'],
       achievements: ['99.95% uptime maintained', 'MTTR reduced by 60%', 'Automated 90% of incidents']
     },
@@ -61,7 +58,6 @@ export function SkillsShowcase() {
       icon: Server,
       color: 'text-blue-400',
       bgColor: 'bg-blue-500/10',
-      proficiency: 92,
       tools: ['Kubernetes', 'Helm', 'Kustomize', 'ArgoCD', 'Istio', 'KEDA'],
       achievements: ['Managed 500+ node clusters', 'Zero-downtime deployments', 'Multi-region orchestration']
     },
@@ -73,7 +69,6 @@ export function SkillsShowcase() {
       icon: GitBranch,
       color: 'text-green-400',
       bgColor: 'bg-green-500/10',
-      proficiency: 90,
       tools: ['ArgoCD', 'Flux', 'Tekton', 'GitHub Actions', 'Jenkins', 'Spinnaker'],
       achievements: ['100% GitOps adoption', '50% faster deployments', 'Automated security gates']
     },
@@ -85,7 +80,6 @@ export function SkillsShowcase() {
       icon: Cloud,
       color: 'text-sky-400',
       bgColor: 'bg-sky-500/10',
-      proficiency: 88,
       tools: ['AWS', 'GCP', 'Azure', 'CloudFormation', 'CDK', 'Anthos'],
       achievements: ['Multi-cloud strategy design', '40% cost optimization', 'Hybrid cloud migration']
     },
@@ -97,7 +91,6 @@ export function SkillsShowcase() {
       icon: Settings,
       color: 'text-purple-400',
       bgColor: 'bg-purple-500/10',
-      proficiency: 93,
       tools: ['Terraform', 'Crossplane', 'Pulumi', 'Ansible', 'CDK', 'Bicep'],
       achievements: ['100% infrastructure automation', 'Immutable deployments', 'Self-healing systems']
     },
@@ -109,7 +102,6 @@ export function SkillsShowcase() {
       icon: Lock,
       color: 'text-orange-400',
       bgColor: 'bg-orange-500/10',
-      proficiency: 87,
       tools: ['Falco', 'Trivy', 'OPA', 'Vault', 'Cert-Manager', 'Aqua Security'],
       achievements: ['Zero security incidents', 'SOC2 compliance', 'Automated vulnerability scanning']
     },
@@ -121,7 +113,6 @@ export function SkillsShowcase() {
       icon: Activity,
       color: 'text-yellow-400',
       bgColor: 'bg-yellow-500/10',
-      proficiency: 91,
       tools: ['Prometheus', 'Grafana', 'Jaeger', 'OpenTelemetry', 'ELK Stack', 'Fluentd'],
       achievements: ['360° observability', 'Custom SLI dashboards', 'Proactive alerting']
     },
@@ -133,7 +124,6 @@ export function SkillsShowcase() {
       icon: Brain,
       color: 'text-pink-400',
       bgColor: 'bg-pink-500/10',
-      proficiency: 82,
       tools: ['Kubeflow', 'MLflow', 'BentoML', 'Seldon', 'Pinecone', 'Weaviate'],
       achievements: ['ML pipeline automation', 'Model versioning', 'A/B testing framework']
     },
@@ -145,7 +135,6 @@ export function SkillsShowcase() {
       icon: Network,
       color: 'text-teal-400',
       bgColor: 'bg-teal-500/10',
-      proficiency: 85,
       tools: ['Istio', 'Linkerd', 'Envoy', 'Cilium', 'Calico', 'Consul Connect'],
       achievements: ['Zero-trust networking', 'mTLS everywhere', 'Traffic management']
     },
@@ -157,7 +146,6 @@ export function SkillsShowcase() {
       icon: Database,
       color: 'text-indigo-400',
       bgColor: 'bg-indigo-500/10',
-      proficiency: 80,
       tools: ['Apache Spark', 'Airflow', 'Kafka', 'Snowflake', 'dbt', 'Databricks'],
       achievements: ['Petabyte-scale processing', 'Real-time pipelines', 'Data mesh architecture']
     },
@@ -169,7 +157,6 @@ export function SkillsShowcase() {
       icon: Zap,
       color: 'text-yellow-500',
       bgColor: 'bg-yellow-500/10',
-      proficiency: 89,
       tools: ['K6', 'JMeter', 'Gatling', 'Artillery', 'Locust', 'Apache Bench'],
       achievements: ['50% latency reduction', 'Predictive scaling', 'Performance SLOs']
     },
@@ -181,7 +168,6 @@ export function SkillsShowcase() {
       icon: Layers,
       color: 'text-emerald-400',
       bgColor: 'bg-emerald-500/10',
-      proficiency: 86,
       tools: ['Backstage', 'Crossplane', 'Humanitec', 'Port', 'Kratix', 'Score'],
       achievements: ['Developer self-service', '70% faster onboarding', 'Golden path templates']
     }
@@ -222,22 +208,9 @@ export function SkillsShowcase() {
     return category?.skills || [];
   };
 
-  useEffect(() => {
-    // Animate proficiency bars on mount
-    const timer = setTimeout(() => {
-      const animated: Record<string, number> = {};
-      skills.forEach(skill => {
-        animated[skill.id] = skill.proficiency;
-      });
-      setAnimatedProficiencies(animated);
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, []);
 
   const overallStats = {
     totalSkills: skills.length,
-    avgProficiency: Math.round(skills.reduce((sum, skill) => sum + skill.proficiency, 0) / skills.length),
     yearsExperience: 4,
     certifications: 12
   };
@@ -255,12 +228,8 @@ export function SkillsShowcase() {
           {/* Stats Overview */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl mx-auto">
             <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-              <div className="text-2xl font-bold text-sky-400">{overallStats.totalSkills}</div>
+              <div className="text-2xl font-bold text-purple-400">{overallStats.totalSkills}</div>
               <div className="text-gray-400 text-sm">Core Skills</div>
-            </div>
-            <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-              <div className="text-2xl font-bold text-green-400">{overallStats.avgProficiency}%</div>
-              <div className="text-gray-400 text-sm">Avg Proficiency</div>
             </div>
             <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
               <div className="text-2xl font-bold text-purple-400">{overallStats.yearsExperience}+</div>
@@ -279,9 +248,9 @@ export function SkillsShowcase() {
             <button
               key={category}
               onClick={() => setSelectedCategory(category)}
-              className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
+              className={`className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-6 py-2 rounded-full transition-all duration-300 transform hover:scale-105" ${
                 selectedCategory === category
-                  ? 'bg-sky-500 text-white shadow-lg'
+                  ? 'bg-purple-600 text-white shadow-lg'
                   : 'bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white'
               }`}
             >
@@ -294,13 +263,12 @@ export function SkillsShowcase() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {getFilteredSkills().map((skill) => {
             const Icon = skill.icon;
-            const animatedProficiency = animatedProficiencies[skill.id] || 0;
             
             return (
               <div
                 key={skill.id}
                 onClick={() => setSelectedSkill(skill)}
-                className={`${skill.bgColor} rounded-xl p-6 border border-gray-700 hover:border-sky-500 cursor-pointer transition-all duration-300 hover:transform hover:scale-105 hover:shadow-xl`}
+                className={`${skill.bgColor} rounded-xl p-6 border border-gray-700 hover:border-purple-500 cursor-pointer transition-all duration-300 hover:transform hover:scale-105 hover:shadow-xl`}
               >
                 <div className="flex items-center space-x-4 mb-4">
                   <div className="w-12 h-12 bg-gray-700 rounded-lg flex items-center justify-center">
@@ -308,25 +276,12 @@ export function SkillsShowcase() {
                   </div>
                   <div className="flex-1">
                     <h3 className="text-xl font-bold text-white">{skill.title}</h3>
-                    <span className="text-sky-400 text-sm font-medium">{skill.subtitle}</span>
+                    <span className="text-purple-400 text-sm font-medium">{skill.subtitle}</span>
                   </div>
                 </div>
 
                 <p className="text-gray-300 text-sm mb-4 leading-relaxed">{skill.description}</p>
 
-                {/* Proficiency Bar */}
-                <div className="mb-4">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-gray-400 text-sm">Proficiency</span>
-                    <span className="text-white font-medium">{skill.proficiency}%</span>
-                  </div>
-                  <div className="w-full bg-gray-700 rounded-full h-2">
-                    <div
-                      className={`h-2 rounded-full transition-all duration-1000 ease-out ${skill.color.replace('text-', 'bg-')}`}
-                      style={{ width: `${animatedProficiency}%` }}
-                    ></div>
-                  </div>
-                </div>
 
                 {/* Top Tools */}
                 <div className="flex flex-wrap gap-2">
@@ -360,7 +315,7 @@ export function SkillsShowcase() {
                   </div>
                   <div>
                     <h2 className="text-3xl font-bold text-white">{selectedSkill.title}</h2>
-                    <span className="text-sky-400 text-lg">{selectedSkill.subtitle}</span>
+                    <span className="text-purple-400 text-lg">{selectedSkill.subtitle}</span>
                   </div>
                 </div>
                 <button
@@ -399,7 +354,7 @@ export function SkillsShowcase() {
                   <div className="space-y-3">
                     {selectedSkill.achievements.map((achievement, index) => (
                       <div key={index} className="flex items-start space-x-3 p-3 bg-gray-700 rounded-lg">
-                        <div className="w-2 h-2 bg-sky-400 rounded-full mt-2 flex-shrink-0"></div>
+                        <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 flex-shrink-0"></div>
                         <span className="text-gray-300">{achievement}</span>
                       </div>
                     ))}
@@ -407,29 +362,6 @@ export function SkillsShowcase() {
                 </div>
               </div>
 
-              {/* Proficiency Visualization */}
-              <div className="mt-8 p-6 bg-gray-700 rounded-lg">
-                <h3 className="text-xl font-bold text-white mb-4 flex items-center">
-                  <Monitor className="h-5 w-5 mr-2" />
-                  Proficiency Level
-                </h3>
-                <div className="flex items-center space-x-4">
-                  <div className="flex-1">
-                    <div className="w-full bg-gray-600 rounded-full h-4">
-                      <div
-                        className={`h-4 rounded-full transition-all duration-1000 ${selectedSkill.color.replace('text-', 'bg-')}`}
-                        style={{ width: `${selectedSkill.proficiency}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                  <div className="text-2xl font-bold text-white">{selectedSkill.proficiency}%</div>
-                </div>
-                <div className="mt-2 text-gray-400 text-sm">
-                  {selectedSkill.proficiency >= 90 ? 'Expert Level' :
-                   selectedSkill.proficiency >= 80 ? 'Advanced Level' :
-                   selectedSkill.proficiency >= 70 ? 'Intermediate Level' : 'Developing'}
-                </div>
-              </div>
             </div>
           </div>
         )}
